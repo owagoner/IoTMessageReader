@@ -6,9 +6,11 @@
 package edu.cmu.iotmessagereader;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.microsoft.windowsazure.services.servicebus.*;
 import com.microsoft.windowsazure.services.servicebus.models.*;
 import com.microsoft.windowsazure.Configuration;
+import edu.cmu.resources.DocumentDb;
 import edu.cmu.sensormessage.SensorReadingMessage;
 
 import java.util.ArrayList;
@@ -30,9 +32,10 @@ public class ReadQueue {
     private String addSensorQueue = "AddSensorQueue";
     private String sensorReadingQueue = "SensorReadingQueue";
     private String deleteSensorQueue = "DeleteSensorQueue";
+    private static DocumentDb documentDB = new DocumentDb();
 
-    public ArrayList ReadMessage() {
-        List<String> list = new ArrayList<>();
+    public void ReadMessage() {
+        //List<String> list = new ArrayList<>();
         Configuration config = ServiceBusConfiguration.configureWithSASAuthentication(namespace, "RootManageSharedAccessKey", key1, url);
         service = ServiceBusService.create(config);
         try {
@@ -48,24 +51,40 @@ public class ReadQueue {
                     // Display the queue message.
                     System.out.print("From queue: ");
                     byte[] b = new byte[200];
-                    String s = null;
+                    String s = "";
+
                     int numRead = message.getBody().read(b);
                     while (-1 != numRead) {
-                        s = new String(b);
+                        s = s + new String(b);
                         s = s.trim();
                         System.out.print(s);
-                        list.add(s);
+                        //list.add(s);
                         numRead = message.getBody().read(b);
                     }
-                    Gson gson = new Gson();
+//                    Gson gson = new Gson();
+//                    SensorReadingMessage srMessage = gson.fromJson(s, SensorReadingMessage.class);
+
+                    Gson gson = new GsonBuilder().create();
                     SensorReadingMessage srMessage = gson.fromJson(s, SensorReadingMessage.class);
-                    
-                    System.out.println();
-                    System.out.println("Custom Property: "
-                            + message.getProperty("MyProperty"));
-                    // Remove message from queue.
-                    System.out.println("Deleting this message.");
-                    //service.deleteMessage(message);
+
+                    boolean isValid = validateHash(srMessage);
+
+                    if (isValid) {
+                        srMessage.setSignature(message.getProperty("Signature").toString());
+                        boolean isStored = documentDB.addSensorDataPoint(srMessage);
+                        if (isStored) {
+                            // Remove message from queue.
+                            System.out.println("Deleting this message.");
+                            //service.deleteMessage(message);
+                        } else {
+                            //Failed to store to database
+                            System.out.println("Unable to store data at this time.");
+                        }
+                    } else {
+                        //Not valid... write to log
+                        boolean res = documentDB.addUnvalidatedSensorMessage(srMessage);
+                    }
+
                 } else {
                     System.out.println("Finishing up - no more messages.");
                     break;
@@ -78,6 +97,11 @@ public class ReadQueue {
             System.out.println(e.getMessage());
             System.exit(-1);
         }
-        return (ArrayList) list;
+        //return (ArrayList) list;
+    }
+
+    private boolean validateHash(SensorReadingMessage message) {
+
+        return true;
     }
 }

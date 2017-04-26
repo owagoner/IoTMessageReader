@@ -14,11 +14,11 @@ public class MessageReaderApp {
 
         while (true) {
             ReadQueue rq = new ReadQueue();
-            ArrayList<String> list = rq.ReadMessage();
+            rq.ReadMessage();
 
-            for (String s : list) {
-                System.out.println(s);
-            }
+//            for (String s : list) {
+//                System.out.println(s);
+//            }
             Thread.sleep(5000);
         }
 

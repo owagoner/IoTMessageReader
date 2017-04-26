@@ -17,11 +17,48 @@ public class SensorReadingMessage {
     private String sensorHash;
     private String data;
     private Date date;
+    private String signature;
 
+    public SensorReadingMessage(){
+    
+    }
+    
     public SensorReadingMessage(String sensorHash, String data, Date date) {
         this.sensorHash = sensorHash;
         this.data = data;
         this.date = date;
+    }
+
+    public String getSensorHash() {
+        return sensorHash;
+    }
+
+    public void setSensorHash(String sensorHash) {
+        this.sensorHash = sensorHash;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
     
     public String serialize(){
