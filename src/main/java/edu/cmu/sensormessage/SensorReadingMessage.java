@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.cmu.sensormessage;
 
 import com.google.gson.Gson;
@@ -19,10 +14,15 @@ public class SensorReadingMessage {
     private Date date;
     private String signature;
 
-    public SensorReadingMessage(){
+    public SensorReadingMessage(){}
     
-    }
-    
+    /**
+     * Constructor that generates SensorReadingMessage with provided hash, data,
+     *  and date values.
+     * @param sensorHash - SHA256 hash of sensor metadata.
+     * @param data - sensor data value.
+     * @param date - date of data value.
+     */
     public SensorReadingMessage(String sensorHash, String data, Date date) {
         this.sensorHash = sensorHash;
         this.data = data;
